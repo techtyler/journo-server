@@ -15,13 +15,12 @@ class JournalApi {
     if (journalsDir.existsSync()) {
       journalsDir.listSync().forEach((entity) {
         if (entity is Directory) {
-          journals.add(entity.path);
+          journals.add(entity.path.split(Platform.pathSeparator).last);
         }
       });
     }
 
-    final jsonResponse = jsonEncode({"journals": journals});
-    return Response.ok(jsonResponse,
+    return Response.ok(jsonEncode({"journals": journals}),
         headers: {'Content-Type': 'application/json'});
   }
 
@@ -47,6 +46,8 @@ class JournalApi {
       File spec = File('${journalDir.path}/spec.json');
       await spec.create();
 
+      final encoder = JsonEncoder.withIndent('  ');
+      spec.writeAsString(encoder.convert(defaultSpec.toMap()));
 
       return Response.ok('Journal created successfully',
           headers: {'Content-Type': 'text/plain'});
